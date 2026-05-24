@@ -68,6 +68,10 @@ chrome.runtime.onMessage.addListener(request => {
   }
 });
 
+chrome.action.onClicked.addListener(tab => {
+  chrome.tabs.sendMessage(tab.id, {command: 'toggle'});
+});
+
 self.addEventListener('fetch', e => {
   e.respondWith(fetch(e.request));
 });
