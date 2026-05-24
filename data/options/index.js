@@ -7,8 +7,8 @@ const notify = message => {
 };
 
 chrome.storage.local.get({
-  'dtype': 'q8', // "fp32", "fp16", "q8", "q4", "q4f16"
-  'device': 'webgpu' // "wasm", "webgpu", "cpu"
+  'dtype': 'q8',   // "fp32", "fp16", "q8", "q4", "q4f16"
+  'device': 'wasm' // "wasm", "webgpu", "cpu"
 }).then(prefs => {
   document.getElementById('dtype').value = prefs.dtype;
   document.getElementById('device').value = prefs.device;

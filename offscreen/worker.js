@@ -29,7 +29,7 @@ const map = {
   'Kokoro Fable': 'bm_fable'
 };
 
-const prepare = async ({device = 'webgpu', dtype = 'q8'}) => {
+const prepare = async ({device = 'wasm', dtype = 'q8'}) => {
   if (typeof self.tts === 'undefined') {
     const {env, KokoroTTS} = await import('/offscreen/kokoro/kokoro.web.js');
     env.wasmPaths = {
