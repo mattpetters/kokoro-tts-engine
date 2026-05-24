@@ -72,6 +72,25 @@ chrome.action.onClicked.addListener(tab => {
   chrome.tabs.sendMessage(tab.id, {command: 'toggle'});
 });
 
+const registerContextMenu = () => {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'kokoro-speak',
+      title: '▶ Read with Kokoro',
+      contexts: ['selection']
+    });
+  });
+};
+
+chrome.runtime.onInstalled.addListener(registerContextMenu);
+chrome.runtime.onStartup.addListener(registerContextMenu);
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'kokoro-speak' && info.selectionText) {
+    chrome.tabs.sendMessage(tab.id, {command: 'speak', text: info.selectionText});
+  }
+});
+
 self.addEventListener('fetch', e => {
   e.respondWith(fetch(e.request));
 });

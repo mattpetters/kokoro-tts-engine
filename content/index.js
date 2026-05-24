@@ -236,31 +236,60 @@
     voiceBtn.classList.toggle('active', open);
   };
 
-  // ── text selection trigger ────────────────────────────────────────────────────
+  // ── selection bubble ──────────────────────────────────────────────────────────
 
-  document.addEventListener('selectionchange', () => {
-    const sel = window.getSelection();
-    const text = sel?.toString().trim();
-    if (text && text.length > 1) {
-      pending = text;
-      setVisible(true);
-      if (speechSynthesis.speaking || speechSynthesis.paused) {
-        speechSynthesis.cancel();
-        setPlaying(false);
+  const bubble = document.createElement('button');
+  bubble.id = 'kokoro-bubble';
+  bubble.innerHTML = `
+    <svg viewBox="0 0 16 16" fill="currentColor">
+      <path d="M3 2.5l10 5.5-10 5.5V2.5z"/>
+    </svg>
+    Listen
+  `;
+  document.documentElement.appendChild(bubble);
+
+  const showBubble = rect => {
+    // Position just below the end of the selection, clamped inside viewport
+    const x = Math.min(rect.right, window.innerWidth - 100);
+    const y = rect.bottom + window.scrollY + 8;
+    bubble.style.left = x + 'px';
+    bubble.style.top  = y + 'px';
+    bubble.classList.add('visible');
+  };
+
+  const hideBubble = () => bubble.classList.remove('visible');
+
+  // Show bubble after mouseup if text is selected and player isn't already open
+  document.addEventListener('mouseup', e => {
+    // Ignore clicks on our own UI
+    if (bubble.contains(e.target) || root.contains(e.target)) return;
+
+    setTimeout(() => {
+      const sel = window.getSelection();
+      const text = sel?.toString().trim();
+      if (text && text.length > 1 && !visible) {
+        pending = text;
+        const range = sel.getRangeAt(0);
+        showBubble(range.getBoundingClientRect());
+      } else {
+        hideBubble();
       }
-    }
+    }, 10); // let browser finalise selection first
   });
 
-  // auto-play on double-click selection
-  document.addEventListener('mouseup', () => {
-    const text = window.getSelection()?.toString().trim();
-    if (text && text.length > 1 && !speechSynthesis.speaking) {
-      pending = text;
-      speak(text);
-    }
+  // Hide bubble when selection is cleared
+  document.addEventListener('selectionchange', () => {
+    if (!window.getSelection()?.toString().trim()) hideBubble();
   });
 
-  // ── toolbar icon message ──────────────────────────────────────────────────────
+  bubble.addEventListener('click', e => {
+    e.stopPropagation();
+    hideBubble();
+    setVisible(true);
+    speak(pending);
+  });
+
+  // ── messages (toolbar icon + context menu) ────────────────────────────────────
 
   chrome.runtime.onMessage.addListener(msg => {
     if (msg.command === 'toggle') {
@@ -272,6 +301,11 @@
         setVisible(true);
         speak(pending);
       }
+    } else if (msg.command === 'speak' && msg.text) {
+      pending = msg.text;
+      hideBubble();
+      setVisible(true);
+      speak(msg.text);
     }
   });
 })();

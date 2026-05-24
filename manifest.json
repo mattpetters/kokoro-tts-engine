@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "name": "Kokoro TTS Engine",
   "description": "Privacy-friendly, offline, 82M param, open-weight text-to-speech (TTS) engine",
-  "permissions": ["ttsEngine", "offscreen", "storage", "unlimitedStorage", "activeTab", "scripting", "tabs"],
+  "permissions": ["ttsEngine", "offscreen", "storage", "unlimitedStorage", "activeTab", "scripting", "tabs", "contextMenus"],
   "icons": {
     "16": "/data/icons/16.png",
     "32": "/data/icons/32.png",
